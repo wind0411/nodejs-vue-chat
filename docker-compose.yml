@@ -1,0 +1,38 @@
+version: "3.7"
+services:
+  app:
+    build: ./app
+    restart: always
+    container_name: nodejs-vue-chat-pusher-app
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - VUE_APP_PUSHER_APP_ID=${PUSHER_APP_ID}
+      - VUE_APP_PUSHER_APP_KEY=${PUSHER_APP_KEY}
+      - VUE_APP_PUSHER_APP_SECRET=${PUSHER_APP_SECRET}
+      - VUE_APP_PUSHER_APP_CLUSTER=${PUSHER_APP_CLUSTER}
+      - VUE_APP_SERVER_PORT=${SERVER_PORT}
+    ports:
+      - "80:8080"
+    volumes:
+      - ./app:/var/www/html
+
+    stdin_open: true
+    tty: true
+  server:
+    build: ./server
+    restart: always
+    container_name: nodejs-vue-chat-pusher-server
+    environment:
+      - PUSHER_APP_ID=${PUSHER_APP_ID}
+      - PUSHER_APP_KEY=${PUSHER_APP_KEY}
+      - PUSHER_APP_SECRET=${PUSHER_APP_SECRET}
+      - PUSHER_APP_CLUSTER=${PUSHER_APP_CLUSTER}
+      - PUSHER_APP_ENCRYPTED_MASTER_KEY=${PUSHER_APP_ENCRYPTED_MASTER_KEY_BASE64}
+
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    volumes:
+      - ./server/:/var/www/html
+    command: [sh, -c, yarn start]
+    stdin_open: true
+    tty: true
